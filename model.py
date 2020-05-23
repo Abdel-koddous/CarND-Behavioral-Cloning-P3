@@ -1,11 +1,11 @@
-print("Training the model with data loaded via Generator")
+print("Training the model with data loaded in batches using generators")
 
 import csv
 import cv2
 import numpy as np
 
 rows=[]
-data_path = 'myFullData/'
+data_path = 'data/'
 
 with open(data_path + 'driving_log.csv') as csvfile:
 
@@ -14,8 +14,11 @@ with open(data_path + 'driving_log.csv') as csvfile:
     for row in csv_reader:
         
         rows.append(row)
+    
+    rows.pop(0)
 
 print("-------------> File has ", len(rows), "  lines <------------------")
+
 
 from sklearn.model_selection import train_test_split
 train_samples, validation_samples = train_test_split(rows, test_size=0.2)
@@ -39,21 +42,21 @@ def generator(samples, batch_size=32):
             for batch_sample in batch_samples:
                     for i in range(3):
                         source_path = batch_sample[i] # This data was generated on my local machine
-                        filename = source_path.split('\\')[-1]
+                        filename = source_path.split('/')[-1]
                         new_path = data_path + "IMG/" + filename
 
                         img = cv2.imread(new_path)
                         images.append(img)
 
                     # steering values
-                    correction = 0.05
+                    correction = 0.2
 
                     center_steering = float( batch_sample[3] )
                     left_steering = center_steering + correction 
                     right_steering = center_steering - correction
 
                     angles.extend([ center_steering, left_steering, right_steering ])
-                    
+                    #angles.append(center_steering)
 
             # Data Augmentation
             
@@ -81,18 +84,6 @@ batch_size=32
 train_generator = generator(train_samples, batch_size=batch_size)
 validation_generator = generator(validation_samples, batch_size=batch_size)
 
-### Data augmentation
-#augmented_imgs, augmented_measurments = [], []
-#for image, measurement in zip(imgs, measurements):
-#    augmented_imgs.append( image )
-#    augmented_measurments.append( measurement )
-    
-#    augmented_imgs.append( cv2.flip(image, 1) )
-#    augmented_measurments.append( -1.0*measurement )
-    
-#X_train = np.array(augmented_imgs)
-#y_train = np.array(augmented_measurments)
-#print(X_train.shape, y_train.shape)
 
 # Let's train our data
 from keras.models import Sequential
@@ -102,21 +93,11 @@ from keras.layers.pooling import MaxPooling2D
 from keras.layers.core import Dropout
 
 model = Sequential()
-# data preprocessing : cropping and normalization
+### Data preprocessing
+# Corpping
 model.add(Cropping2D(cropping=( (70,25), (0,0) ), input_shape=(160, 320, 3) ) )
+# Normalization
 model.add( Lambda( lambda x: (x /255.0) - 0.5) )
-# data augmentation : flip images horizontaly
-
-### LeNet Architecture
-#model.add( Conv2D( 6, (5, 5), padding='valid', activation='relu') )
-#model.add( MaxPooling2D( pool_size=(2, 2) ) )
-#model.add( Conv2D( 16, (5, 5), padding='valid', activation='relu') ) 
-#model.add( MaxPooling2D( pool_size=(2, 2) ) )    
-#model.add( Flatten() )
-# Fully connected layers
-#model.add( Dense(120) )
-#model.add( Dense(84) )
-#model.add( Dense(1) ) # Steering Angle is my output
 
 ### Nvidia Self Driving Car Pipeline
 model.add( Conv2D( 24, (5, 5), strides=(2, 2), padding='valid', activation='relu') )
@@ -124,6 +105,7 @@ model.add( Conv2D( 36, (5, 5), strides=(2, 2), padding='valid', activation='relu
 model.add( Conv2D( 48, (5, 5), strides=(2, 2), padding='valid', activation='relu') )
 model.add( Conv2D( 64, (3, 3), strides=(1, 1), padding='valid', activation='relu') )
 model.add( Conv2D( 64, (3, 3), strides=(1, 1), padding='valid', activation='relu') )
+model.add( Dropout(0.5) )
 model.add( Flatten() )
 model.add( Dense(100) )
 model.add( Dense(50) )
@@ -139,4 +121,3 @@ model.fit_generator(train_generator, steps_per_epoch=ceil(len(train_samples)/bat
 
 model.save( 'model.h5' )
 
-### Visualizing the loss
