@@ -20,6 +20,7 @@ with open(data_path + 'driving_log.csv') as csvfile:
 print("-------------> File has ", len(rows), "  lines <------------------")
 
 
+
 from sklearn.model_selection import train_test_split
 train_samples, validation_samples = train_test_split(rows, test_size=0.2)
 
@@ -85,6 +86,7 @@ train_generator = generator(train_samples, batch_size=batch_size)
 validation_generator = generator(validation_samples, batch_size=batch_size)
 
 
+
 # Let's train our data
 from keras.models import Sequential
 from keras.layers import Flatten, Dense, Lambda, Cropping2D, Dropout
@@ -98,6 +100,9 @@ model = Sequential()
 model.add(Cropping2D(cropping=( (70,25), (0,0) ), input_shape=(160, 320, 3) ) )
 # Normalization
 model.add( Lambda( lambda x: (x /255.0) - 0.5) )
+# data augmentation : flip images horizontaly
+
+
 
 ### Nvidia Self Driving Car Pipeline
 model.add( Conv2D( 24, (5, 5), strides=(2, 2), padding='valid', activation='relu') )
@@ -105,11 +110,14 @@ model.add( Conv2D( 36, (5, 5), strides=(2, 2), padding='valid', activation='relu
 model.add( Conv2D( 48, (5, 5), strides=(2, 2), padding='valid', activation='relu') )
 model.add( Conv2D( 64, (3, 3), strides=(1, 1), padding='valid', activation='relu') )
 model.add( Conv2D( 64, (3, 3), strides=(1, 1), padding='valid', activation='relu') )
-model.add( Dropout(0.5) )
+#model.add( Dropout(0.5) )
 model.add( Flatten() )
-model.add( Dense(100) )
-model.add( Dense(50) )
-model.add( Dense(10) ) 
+model.add( Dense( (100), activation='relu' ) )
+model.add( Dropout(0.3) )
+model.add( Dense( (50), activation='relu' ) )
+model.add( Dropout(0.3) )
+model.add( Dense( (10), activation='relu' ) )
+model.add( Dropout(0.3) )
 model.add( Dense(1) ) # Steering Angle is my output
 
 model.compile( loss='mse', optimizer='adam' ) # A regeression network vs previously seen classification networks
@@ -117,7 +125,8 @@ model.compile( loss='mse', optimizer='adam' ) # A regeression network vs previou
 model.fit_generator(train_generator, steps_per_epoch=ceil(len(train_samples)/batch_size), 
             validation_data=validation_generator, 
             validation_steps=ceil(len(validation_samples)/batch_size),
-            epochs=5, verbose=1)
+            epochs=3, verbose=1)
 
 model.save( 'model.h5' )
 
+### Visualizing the loss
