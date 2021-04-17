@@ -3,6 +3,9 @@
 
 
 [image1]: ./writeup_images/nvidia_nn.jpg "Nvidia End to End Learning NN"
+[image2]: ./writeup_images/rawHistogram.jpg "Udacity raw driving log"
+[image3]: ./writeup_images/flattenedHistogram.jpg "Udacity flattened driving log"
+
 [gif1]: ./writeup_images/driveAroundTheTrack.gif "Final model driving around the track"
 
 The goal of this project is to drive a car around a track by generating steering commands as out of Neural Network pipleine where the input is the front cameras images of the vehicle.
@@ -54,10 +57,19 @@ Initially I tried with my own data:
 * Flipping the images and taking the opposite value of the steering angle.
 * Used right and left camera images and introduced a correction factor of 0.2 to the steering angles.
 
+
+## Update
+
+After receiving the review on my project I made a modification on the distribution of the udacity driving log by filtering out around 75% of the images that have a near zero (`0.05`) steering angle. This way I was able to flatten the distribution and reduce the bias of my model around zero steering angle.
+
+  ![alt text][image2]
+
+  ![alt text][image3]
+  
 ### Demo time!
 
-Final model driving around the track:
+Updated model driving around the track:
 
   ![alt text][gif1]
 
-The full video can be found [here](video.mp4).
+The full video can be found [here](2laps20mphAccelerated3.mp4).
