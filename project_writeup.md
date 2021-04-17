@@ -2,9 +2,9 @@
 #### Abdelkododus Khamsi
 
 
-[image1]: ./writeup_images/nvidia_nn.jpg "Nvidia End to End Learning NN"
-[image2]: ./writeup_images/rawHistogram.jpg "Udacity raw driving log"
-[image3]: ./writeup_images/flattenedHistogram.jpg "Udacity flattened driving log"
+[image1]: ./writeup_images/nvidia_nn.JPG "Nvidia End to End Learning NN"
+[image2]: ./writeup_images/rawHistogram.JPG "Udacity raw driving log"
+[image3]: ./writeup_images/flattenedHistogram.JPG "Udacity flattened driving log"
 
 [gif1]: ./writeup_images/driveAroundTheTrack.gif "Final model driving around the track"
 
